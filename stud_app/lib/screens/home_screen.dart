@@ -20,16 +20,12 @@ class _HomeScreenState extends State<HomeScreen> {
     futureStudents = apiService.getStudents();
   }
 
-  void _showImageDialog(Uint8List imageData) {
+  void _showImageDialog(Uint8List imageData, String tag) {
     showDialog(
       context: context,
+      barrierDismissible: true, // Allow dismissing by tapping outside
       builder: (context) {
-        return Dialog(
-          child: Container(
-            padding: EdgeInsets.all(10),
-            child: Image.memory(imageData),
-          ),
-        );
+        return ImageDialog(imageData: imageData, tag: tag);
       },
     );
   }
@@ -59,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   DataColumn(label: Text('Student Number')),
                   DataColumn(label: Text('Age')),
                   DataColumn(label: Text('Phone Number')),
-                  DataColumn(label: Text('Image')), // Add this line
+                  DataColumn(label: Text('Image')), 
                   DataColumn(label: Text('Actions')),
                 ],
                 rows: snapshot.data!.map((student) {
@@ -72,11 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     DataCell(
                       student.image != null && student.image!.isNotEmpty
                           ? GestureDetector(
-                              onTap: () => _showImageDialog(base64Decode(student.image!)),
-                              child: Image.memory(
-                                base64Decode(student.image!),
-                                width: 50,
-                                height: 50,
+                              onTap: () => _showImageDialog(base64Decode(student.image!), 'image_${student.id}'),
+                              child: Hero(
+                                tag: 'image_${student.id}',
+                                child: Image.memory(
+                                  base64Decode(student.image!),
+                                  width: 50,
+                                  height: 50,
+                                ),
                               ),
                             )
                           : Text('No image'),
@@ -109,7 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ],
-                    )),
+                    ),
+                    ),
                   ]);
                 }).toList(),
               ),
@@ -131,6 +131,30 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           });
         },
+      ),
+    );
+  }
+}
+
+class ImageDialog extends StatelessWidget {
+  final Uint8List imageData;
+  final String tag;
+
+  ImageDialog({required this.imageData, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () {}, // Prevents the dialog from closing when tapping on the image
+          child: Hero(
+            tag: tag,
+            child: Image.memory(imageData),
+          ),
+        ),
       ),
     );
   }
