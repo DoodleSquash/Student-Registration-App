@@ -115,6 +115,7 @@ class _StudentFormState extends State<StudentForm> {
                 TextFormField(
                   controller: _phoneNumberController,
                   decoration: InputDecoration(labelText: 'Phone Number'),
+                  keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a phone number';
